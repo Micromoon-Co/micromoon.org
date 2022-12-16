@@ -1,29 +1,74 @@
-function httpGet()
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", "https://meme-api.com/gimme", false );
-    xmlHttp.send( null );
+let meme
+let nsfwToggle = document.getElementById("nsfw-toggle")
+let timerDisplay = document.getElementById("timer")
+let seconds
+
+function requestMeme() {
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", "https://meme-api.com/gimme", false);
+    xmlHttp.send(null);
     return JSON.parse(xmlHttp.responseText);
 }
 
-let meme = httpGet()
+function setNSFWToggle() {
+    if (getNSFWCookie()) {
+        nsfwToggle.textContent = "NSFW Gösterme"
+    } else {
+        nsfwToggle.textContent = "NSFW Göster"
+    }
+
+}
+
+function getNSFWCookie() {
+    try {
+        return document.cookie.split("=")[1].split(";")[0] === "true"
+    }
+    catch (TypeError) {
+        setNSFWCookie(false)
+        return false
+    }
+}
+
+function setNSFWCookie(value) {
+    document.cookie = "nsfw=" + value + "; Sat, 13 Sep 275760 00:00:00 GMT"
+}
+
+function toggleNSFW() {
+    setNSFWCookie(!getNSFWCookie())
+    setNSFWToggle()
+}
+
 
 function getMeme() {
-    if (meme.nsfw === true) {
-        location.reload() 
+    seconds = 30
+    timerDisplay.textContent = "Yenileniyor..."
+    meme = requestMeme()
+    if (!getNSFWCookie()) {
+        while (meme.nsfw === true) {
+            meme = requestMeme()
+        }
     }
-    else {
-        document.getElementById("meme").src = meme.url       
-}
-}
-
-function getTitle() {
+    document.getElementById("meme").src = meme.url
     document.getElementById("title").innerHTML = "Başlık: " + meme.title
+    document.getElementById("title-url").href = meme.postLink
+    if (meme.nsfw) {
+        document.getElementById("title").innerHTML += " (NSFW)"
+    }
+    document.getElementById("source-sub").innerHTML = "Kaynak Subreddit: " + meme.subreddit
+    document.getElementById("source-sub-url").href = "https://reddit.com/r/" + meme.subreddit
 }
 
-function getSubreddit() {
-    document.write("<h2> Kaynak Subreddit: " + meme.subreddit + "</h2>") 
+function timer() {
+    if (seconds === 0) {
+        getMeme()
+    }
+    seconds--
+    timerDisplay.textContent = seconds + " saniyeye yenilenecek"
 }
-getTitle()
+
 getMeme()
-getSubreddit()
+document.getElementById("meme").addEventListener("click", getMeme)
+nsfwToggle.addEventListener("click", toggleNSFW)
+setNSFWToggle()
+
+setInterval(timer, 1000)
