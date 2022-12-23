@@ -41,7 +41,6 @@ button {
 #popup {
     display: flex;
     background-color: white;
-    height: 50vh;
     border-radius: 10px;
     position:fixed;
     justify-self: center;
