@@ -51,6 +51,7 @@ button {
     flex-wrap: wrap;
     align-items: center;
     font-family: 'Roboto', sans-serif;
+    width: 50%;
 }
 #close {
     background-color: black;
